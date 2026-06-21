@@ -1,0 +1,8 @@
+# chrono-tz bundles the IANA tz database into the binary. We only ever resolve
+# America/Los_Angeles (peak-hours math in src/peak.rs), so filter the bundled
+# db down to that one zone — keeps the binary ~1.1 MB smaller than the full db.
+# `force = true` applies it to every build/test/install run from this repo, so
+# no build path (cargo install --path, CI, Docker) needs to set it manually.
+# Requires chrono-tz's `filter-by-regex` feature (see Cargo.toml).
+[env]
+CHRONO_TZ_TIMEZONE_FILTER = { value = "America/Los_Angeles", force = true }
