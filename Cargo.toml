@@ -1,6 +1,6 @@
 [package]
 name = "cc-statusline"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Customizable Claude Code statusline with rate-limit curves, context bar, and git info"
 license = "MIT"
