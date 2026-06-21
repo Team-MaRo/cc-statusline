@@ -5,6 +5,10 @@ on:
     branches: [master, develop]
   pull_request:
 
+# Least privilege: both jobs only read the checked-out source.
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest

@@ -103,13 +103,13 @@ jobs:
             --clobber --repo "${{ github.repository }}"
 
   # Tell the Homebrew tap to refresh its formula once all binaries are uploaded.
-  # No-op unless GH_TOKEN (a PAT with repo scope on Team-MaRo/homebrew-tap) is
-  # set; the tap's bump-cc-statusline.yml reads client_payload.version.
+  # No-op unless the GH_PAT secret (a PAT with repo scope on Team-MaRo/homebrew-tap)
+  # is set; the tap's bump-cc-statusline.yml reads client_payload.version.
   notify-homebrew-tap:
     needs: upload-binaries
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GH_TOKEN: ${{ secrets.GH_PAT }}
     steps:
       - name: Dispatch tap bump
         if: ${{ env.GH_TOKEN != '' }}
