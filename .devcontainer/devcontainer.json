@@ -1,0 +1,53 @@
+{
+  "name": "cc-statusline",
+
+  "image": "mcr.microsoft.com/devcontainers/rust:1-bookworm",
+
+  "remoteEnv": {
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+    "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
+  },
+
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/act:1": {}
+  },
+
+  "postCreateCommand": "sudo chown -R vscode:vscode /usr/local/cargo/registry ${containerWorkspaceFolder}/target && docker pull catthehacker/ubuntu:act-latest && rustup component add rustfmt clippy && cargo fetch",
+
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["README.md"]
+    },
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "editorconfig.editorconfig",
+        "vadimcn.vscode-lldb",
+        "serayuzgur.crates"
+      ],
+      "settings": {
+        "rust-analyzer.check.command": "clippy",
+        "editor.formatOnSave": true,
+        "[rust]": {
+          "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        }
+      }
+    }
+  },
+
+  "mounts": [
+    "source=cc-statusline-cargo-cache,target=/usr/local/cargo/registry,type=volume",
+    "source=cc-statusline-target-cache,target=${containerWorkspaceFolder}/target,type=volume"
+  ],
+
+  "remoteUser": "vscode"
+}

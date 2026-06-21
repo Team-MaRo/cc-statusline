@@ -1,0 +1,119 @@
+name: Release Artifacts
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  upload-binaries:
+    name: ${{ matrix.asset }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux — both libc variants, built via cross-rs containers. cargo
+          # inside the container reads ./.cargo/config.toml, so the chrono-tz
+          # CHRONO_TZ_TIMEZONE_FILTER applies automatically.
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            asset: cc-statusline-linux-amd64-gnu
+            cross: true
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-latest
+            asset: cc-statusline-linux-arm64-gnu
+            cross: true
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-latest
+            asset: cc-statusline-linux-amd64-musl
+            cross: true
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-latest
+            asset: cc-statusline-linux-arm64-musl
+            cross: true
+          # macOS — native arm64 + cross x86_64 on the arm64 runner.
+          - target: x86_64-apple-darwin
+            runner: macos-latest
+            asset: cc-statusline-darwin-amd64
+            cross: false
+          - target: aarch64-apple-darwin
+            runner: macos-latest
+            asset: cc-statusline-darwin-arm64
+            cross: false
+          # Windows — x64 MSVC.
+          - target: x86_64-pc-windows-msvc
+            runner: windows-latest
+            asset: cc-statusline-windows-amd64-msvc.exe
+            cross: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Install cross
+        if: ${{ matrix.cross }}
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+
+      - name: Build
+        shell: bash
+        run: |
+          if [ "${{ matrix.cross }}" = "true" ]; then
+            cross build --release --locked --target ${{ matrix.target }}
+          else
+            cargo build --release --locked --target ${{ matrix.target }}
+          fi
+
+      - name: Package (rename to stable asset name)
+        shell: bash
+        run: |
+          src="target/${{ matrix.target }}/release/cc-statusline"
+          [ "${{ runner.os }}" = "Windows" ] && src="${src}.exe"
+          cp "$src" "${{ matrix.asset }}"
+          # Apple Silicon binaries must carry a valid signature to execute;
+          # re-apply an ad-hoc signature after the rename. This is NOT
+          # notarization — browser-downloaded (quarantined) binaries still need
+          # Homebrew or a one-time `xattr -d com.apple.quarantine`.
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            codesign --sign - --force --timestamp=none "${{ matrix.asset }}"
+          fi
+
+      - name: Upload to release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # No .sha256 sidecar — GitHub exposes each asset's sha256 digest on the
+        # release page and via the API (`gh api .../releases/... --jq .assets[].digest`).
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "${{ matrix.asset }}" \
+            --clobber --repo "${{ github.repository }}"
+
+  # Tell the Homebrew tap to refresh its formula once all binaries are uploaded.
+  # No-op unless GH_TOKEN (a PAT with repo scope on Team-MaRo/homebrew-tap) is
+  # set; the tap's bump-cc-statusline.yml reads client_payload.version.
+  notify-homebrew-tap:
+    needs: upload-binaries
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    steps:
+      - name: Dispatch tap bump
+        if: ${{ env.GH_TOKEN != '' }}
+        run: |
+          gh api repos/Team-MaRo/homebrew-tap/dispatches \
+            -f event_type=cc-statusline-release \
+            -F client_payload[version]="${{ github.event.release.tag_name }}"

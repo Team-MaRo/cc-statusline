@@ -1,0 +1,6 @@
+/target
+.claude/settings.local.json
+*.jsonl
+
+# Local Claude pointer (canonical guidance is in AGENTS.md)
+/CLAUDE.md
