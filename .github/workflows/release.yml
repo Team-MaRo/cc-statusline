@@ -14,8 +14,13 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      # Non-empty JSON when release-please created or updated a release PR
+      # this run. Used by `reattribute` below to decide whether to amend.
+      pr: ${{ steps.release.outputs.pr }}
     steps:
       - name: Create Release PR
+        id: release
         uses: googleapis/release-please-action@v5
         with:
           config-file: .github/release-please-config.json
@@ -23,3 +28,38 @@ jobs:
           # Bot PAT with access to Workflows
           # The built-in GITHUB_TOKEN has cannot trigger other workflows
           token: ${{ secrets.GH_PAT }}
+
+  # release-please-action commits the release PR's contents as the PAT
+  # owner (the action has no input to override the commit author). Re-attribute
+  # to github-actions[bot] so the PR shows the bot as author instead of the
+  # person the PAT belongs to.
+  reattribute:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.pr != '' }}
+    runs-on: ubuntu-latest
+    env:
+      # release-please's branch name varies by config (`release-please--branches--<base>`
+      # for single-package, with extra `--components--<name>` segments for component mode).
+      # The action emits the PR object as JSON — pull `headBranchName` from it instead of
+      # guessing the pattern.
+      PR_BRANCH: ${{ fromJSON(needs.release-please.outputs.pr).headBranchName }}
+    steps:
+      - name: Checkout release-please branch
+        uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.GH_PAT }}
+          ref: ${{ env.PR_BRANCH }}
+          fetch-depth: 2
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Amend release commit as github-actions[bot]
+        run: |
+          set -euo pipefail
+          # --reset-author rewrites both author and committer to the configured
+          # identity; --no-edit keeps the existing commit message verbatim.
+          git commit --amend --reset-author --no-edit
+          git push origin "$PR_BRANCH" --force-with-lease
