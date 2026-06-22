@@ -12,6 +12,10 @@ updates:
     target-branch: develop
     labels:
       - "dependabot :robot:"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     schedule:
       interval: weekly
       day: monday
@@ -34,6 +38,10 @@ updates:
     target-branch: develop
     labels:
       - "dependabot :robot:"
+    groups:
+      cargo:
+        patterns:
+          - "*"
     schedule:
       interval: weekly
       day: monday
