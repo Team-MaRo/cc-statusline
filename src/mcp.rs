@@ -119,7 +119,7 @@ pub fn run() {
 
 fn text_result(payload: Value) -> CallToolResult {
     let text = serde_json::to_string_pretty(&payload).unwrap_or_else(|_| payload.to_string());
-    CallToolResult::success(vec![Content::text(text)])
+    CallToolResult::success(vec![ContentBlock::text(text)])
 }
 
 fn payload_context_usage(requested: Option<&str>) -> Value {
