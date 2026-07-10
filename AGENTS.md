@@ -65,7 +65,7 @@ Module map:
 - `bar.rs` — bar glyph rendering. 10 cells × 3 sub-levels (`░` → `▒` → `▓` → `█`); used drives the glyph, expected shown as green ghost at matching sub-level, over-curve red.
 - `rate.rs` — rate-limit math: computes used%, bar, Δ% vs linear expected curve, Δt vs expected remaining time, reset countdown. Window length passed in minutes.
 - `peak.rs` — peak-hours logic (5–11 AM US/Pacific, Mon–Fri). DST-aware via `chrono-tz` (`America::Los_Angeles`). The bundled IANA db is filtered to that one zone by `CHRONO_TZ_TIMEZONE_FILTER`, set with `force = true` in `.cargo/config.toml` (keeps the binary ~1.1 MB smaller than the full db; requires chrono-tz's `filter-by-regex` feature). Colors label red in-peak, green off-peak.
-- `context.rs` — context-window bar/percent, including `_usable` variants scaled against the pre-auto-compact budget (0.98 for ≥500k models, 0.80 otherwise).
+- `context.rs` — context-window bar/percent, including `_usable` variants scaled against the pre-auto-compact budget. Claude Code reserves a roughly constant ~20k off the top before auto-compact, so usable = `(size - 20_000) / size` (≈0.98 at 1M, ≈0.90 at 200k) — confirmed against Claude's own "X% context used" footer at both ends.
 - `state.rs` — persistence. Per-session `cost_segments` + token `segments` (each survives Claude resetting the value mid-chat by starting a new segment); per-session `daily_cost` ledger keyed `YYYY-MM-DD` (local tz). `%cd`/`%cm`/`%ca` are computed by aggregating every session's `daily_cost`. Pruning is opt-in (`--prune <dur>` / `CC_STATUSLINE_STATE_TTL_SECONDS`); off by default.
 - `git.rs` — `git rev-parse --abbrev-ref HEAD` + `git diff --numstat HEAD` in the input `cwd`.
 - `settings.rs` — reads `effortLevel` from `~/.claude/settings.json`.

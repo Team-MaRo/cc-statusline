@@ -103,15 +103,18 @@ pub fn context_bar(context_window: &ContextWindow) -> Option<String> {
     Some(format!("[{}]", plain_bar(percent)))
 }
 
-// TODO: 0.98 is confirmed empirically for 1M Opus (compact ~980k). 0.80 is a legacy
-// assumption for 200k models — needs confirmation. If CC reserves a constant ~20k regardless
-// of size, switch to `(size - 20_000) / size` and drop the threshold.
+// Claude Code reserves a roughly constant ~20k off the top of the window before
+// auto-compact, regardless of window size. Confirmed empirically at both ends:
+// 1M Opus compacts ~980k (ratio 0.98), and 200k models read ~180k usable (ratio
+// 0.90) — matching Claude's own "context used" %. So usable = (size - 20k) / size,
+// not a fixed per-tier ratio.
+const USABLE_RESERVE_TOKENS: u64 = 20_000;
+
 pub fn usable_ratio(size: u64) -> f64 {
-    if size >= 500_000 {
-        0.98
-    } else {
-        0.80
+    if size <= USABLE_RESERVE_TOKENS {
+        return 1.0;
     }
+    (size - USABLE_RESERVE_TOKENS) as f64 / size as f64
 }
 
 pub fn used_percent_usable(context_window: &ContextWindow) -> Option<f64> {

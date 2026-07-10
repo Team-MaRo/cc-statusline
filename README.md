@@ -72,7 +72,7 @@ Smart defaults (used when no `:style` is given on a token):
 - `%effort` — `low/minimal/none` green, `medium` yellow, `high` red, anything else bright_red.
 - `%ctx_tokens` / `%ctx_tokens_used` / `%ctx_tokens_usable` — "used" portion goes red when `exceeds_200k_tokens` is true, else green. `%ctx_tokens_max` is never auto-colored.
 - `%ctx_bar` / `%ctx_bar_usable` — filled bar cells beyond the 200k mark are red, the rest stays uncolored.
-- `%ctx_pct` (`%cup`) and `%ctx_pct_usable` (`%cpu`) — gradient against the auto-compact threshold (100% usable = compact): green below 70%, yellow 70–85%, bright_yellow 85–95%, red at 95%+. Ignores `exceeds_200k_tokens`. Usable budget = `context_window_size × 0.98` for models with ≥500k context (matches Claude Code's "X% context used" footer at ~98% of size); falls back to `× 0.80` for legacy 200k models. The composite `%ctx` / `%cu` displays the raw % but colors it with the same gradient, so the pct portion turns red as auto-compact nears.
+- `%ctx_pct` (`%cup`) and `%ctx_pct_usable` (`%cpu`) — gradient against the auto-compact threshold (100% usable = compact): green below 70%, yellow 70–85%, bright_yellow 85–95%, red at 95%+. Ignores `exceeds_200k_tokens`. Usable budget = `context_window_size − 20k` (Claude Code reserves a roughly constant ~20k before auto-compact, so ≈98% of a 1M window and ≈90% of a 200k window — matches Claude Code's "X% context used" footer at both ends). The composite `%ctx` / `%cu` displays the raw % but colors it with the same gradient, so the pct portion turns red as auto-compact nears.
 - `%diff` — added count green, removed count red.
 
 Any explicit `:style` on a token overrides these defaults.
