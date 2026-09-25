@@ -81,7 +81,7 @@ Any explicit `:style` on a token overrides these defaults.
 {
   "statusLine": {
     "type": "command",
-    "command": "cc-statusline '%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable' '%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d' '%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim ΣTokens:] %tokens_total:bright_cyan  %[dim Speed:] %total_speed:bright_cyan'",
+    "command": "cc-statusline '%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable  %[dim ΣTokens:] %tokens_total:bright_cyan' '%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d' '%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim Speed:] %total_speed:bright_cyan'",
     "padding": 0
   }
 }
@@ -93,7 +93,7 @@ On Windows, swap the single quotes around each line for double quotes (escaped a
 {
   "statusLine": {
     "type": "command",
-    "command": "cc-statusline \"%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable\" \"%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d\" \"%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim ΣTokens:] %tokens_total:bright_cyan  %[dim Speed:] %total_speed:bright_cyan\"",
+    "command": "cc-statusline \"%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable  %[dim ΣTokens:] %tokens_total:bright_cyan\" \"%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d\" \"%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim Speed:] %total_speed:bright_cyan\"",
     "padding": 0
   }
 }
@@ -105,7 +105,7 @@ Set the whole `statusLine` block (type + command + padding) in one shot. `jq` ca
 
 ```sh
 read -r -d '' CMD <<'EOF'
-cc-statusline '%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable' '%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d' '%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim ΣTokens:] %tokens_total:bright_cyan  %[dim Speed:] %total_speed:bright_cyan'
+cc-statusline '%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable  %[dim ΣTokens:] %tokens_total:bright_cyan' '%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d' '%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim Speed:] %total_speed:bright_cyan'
 EOF
 
 jq --arg cmd "$CMD" '.statusLine = {type: "command", command: $cmd, padding: 0}' \
