@@ -72,7 +72,7 @@ Smart defaults (used when no `:style` is given on a token):
 - `%effort` — `low/minimal/none` green, `medium` yellow, `high` red, anything else bright_red.
 - `%ctx_tokens` / `%ctx_tokens_used` / `%ctx_tokens_usable` — "used" portion goes red when `exceeds_200k_tokens` is true, else green. `%ctx_tokens_max` is never auto-colored.
 - `%ctx_bar` / `%ctx_bar_usable` — filled bar cells beyond the 200k mark are red, the rest stays uncolored.
-- `%ctx_pct` (`%cup`) and `%ctx_pct_usable` (`%cpu`) — gradient against the auto-compact threshold (100% usable = compact): green below 70%, yellow 70–85%, bright_yellow 85–95%, red at 95%+. Ignores `exceeds_200k_tokens`. Usable budget = `context_window_size × 0.98` for models with ≥500k context (matches Claude Code's "X% context used" footer at ~98% of size); falls back to `× 0.80` for legacy 200k models. The composite `%ctx` / `%cu` displays the raw % but colors it with the same gradient, so the pct portion turns red as auto-compact nears.
+- `%ctx_pct` (`%cup`) and `%ctx_pct_usable` (`%cpu`) — gradient against the auto-compact threshold (100% usable = compact): green below 70%, yellow 70–85%, bright_yellow 85–95%, red at 95%+. Ignores `exceeds_200k_tokens`. Usable budget = `context_window_size − 20k` (Claude Code reserves a roughly constant ~20k before auto-compact, so ≈98% of a 1M window and ≈90% of a 200k window — matches Claude Code's "X% context used" footer at both ends). The composite `%ctx` / `%cu` displays the raw % but colors it with the same gradient, so the pct portion turns red as auto-compact nears.
 - `%diff` — added count green, removed count red.
 
 Any explicit `:style` on a token overrides these defaults.
@@ -81,7 +81,7 @@ Any explicit `:style` on a token overrides these defaults.
 {
   "statusLine": {
     "type": "command",
-    "command": "cc-statusline '%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable' '%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d' '%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim ΣTokens:] %tokens_total:bright_cyan  %[dim Speed:] %total_speed:bright_cyan'",
+    "command": "cc-statusline '%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable  %[dim ΣTokens:] %tokens_total:bright_cyan' '%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d' '%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim Speed:] %total_speed:bright_cyan'",
     "padding": 0
   }
 }
@@ -93,7 +93,7 @@ On Windows, swap the single quotes around each line for double quotes (escaped a
 {
   "statusLine": {
     "type": "command",
-    "command": "cc-statusline \"%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable\" \"%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d\" \"%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim ΣTokens:] %tokens_total:bright_cyan  %[dim Speed:] %total_speed:bright_cyan\"",
+    "command": "cc-statusline \"%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable  %[dim ΣTokens:] %tokens_total:bright_cyan\" \"%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d\" \"%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim Speed:] %total_speed:bright_cyan\"",
     "padding": 0
   }
 }
@@ -105,7 +105,7 @@ Set the whole `statusLine` block (type + command + padding) in one shot. `jq` ca
 
 ```sh
 read -r -d '' CMD <<'EOF'
-cc-statusline '%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable' '%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d' '%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim ΣTokens:] %tokens_total:bright_cyan  %[dim Speed:] %total_speed:bright_cyan'
+cc-statusline '%[dim Model:] %model:cyan  %[dim Effort:] %effort  %[dim Context:] %ctx_usable  %[dim ΣTokens:] %tokens_total:bright_cyan' '%[dim Session:] %rate5h  %peak  %[dim Weekly:] %rate7d' '%[dim cwd:] %cwd %branch:yellow %diff %[dim Cost:] %cost:green %[dim Σd:] %cost_day:green %[dim Σm:] %cost_month:green %[dim Σ:] %cost_all:green  %[dim Speed:] %total_speed:bright_cyan'
 EOF
 
 jq --arg cmd "$CMD" '.statusLine = {type: "command", command: $cmd, padding: 0}' \
@@ -144,7 +144,7 @@ Honors `NO_COLOR` env and `--no-color` flag.
 |---|---|---|---|
 | `%m` | `%model` | `model.display_name` | `Opus 4.7 (1M context)` |
 | `%mid` | `%model_id` | `model.id` | `claude-opus-4-7[1m]` |
-| `%e` | `%effort` / `%thinking` | `~/.claude/settings.json` `effortLevel` | `medium` |
+| `%e` | `%effort` / `%thinking` | `effort.level` | `medium` |
 | `%f` | `%fast` | `fast_mode` | `fast` or empty |
 | `%cu` | `%ctx` / `%context` | context vs full window | `[█▒░░░░░░░░] 156k/1M (16%)` |
 | `%cuu` | `%ctx_usable` | context vs usable budget (pre-auto-compact) | `[█▒░░░░░░░░] 156k/980k (16%)` |
@@ -202,7 +202,6 @@ Each cell of the bar fills progressively as `░` → `▒` → `▓` → `█` 
 | `NO_COLOR` | unset | Any value disables all ANSI styling (mirrors `--no-color`). Standard cross-tool convention. |
 | `NOW` | unset | Override "current time" as a unix timestamp. Used for deterministic peak-hour / rate-limit math in tests; mirrors `--now`. |
 | `CC_VIM_MODE` | unset | Value rendered by the `%vim` token (e.g. `NORMAL`, `INSERT`). Typically set by a vim-mode integration. |
-| `CLAUDE_CONFIG_DIR` | `~/.claude` | Where to read `settings.json` from (for `%effort` / `effortLevel`). |
 | `XDG_CACHE_HOME` | `~/.cache` | Base directory for `cc-statusline/sessions.json` (the `%tokens_total` state file). |
 | `CC_STATUSLINE_STATE_TTL_SECONDS` | _unset_ (no pruning) | Opt-in retention: when set (seconds), session entries older than this are pruned on each invocation (current session always kept). Equivalent to the `--prune` flag, which takes precedence. Each session carries its own cost ledger, so pruning a session also drops its contribution to the day/month/all-time totals. |
 

@@ -90,8 +90,8 @@ impl CcStatuslineServer {
 
 #[tool_handler]
 impl ServerHandler for CcStatuslineServer {
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new("cc-statusline", env!("CARGO_PKG_VERSION")))
             .with_instructions(
                 "Read-only access to cc-statusline's persisted session state (context usage + rate-limit snapshot).".to_string(),
@@ -119,7 +119,7 @@ pub fn run() {
 
 fn text_result(payload: Value) -> CallToolResult {
     let text = serde_json::to_string_pretty(&payload).unwrap_or_else(|_| payload.to_string());
-    CallToolResult::success(vec![Content::text(text)])
+    CallToolResult::success(vec![ContentBlock::text(text)])
 }
 
 fn payload_context_usage(requested: Option<&str>) -> Value {

@@ -53,7 +53,7 @@ Binary entry: `src/main.rs`. Flow per invocation:
 1. `parse_args` — each positional = one format line (max 3, `MAX_LINES` in main.rs). Flags: `--no-color`, `--now <unix>`, `--prune <dur>`, `--debug`, `-V`, `-h`. `NOW` and `NO_COLOR` env vars mirror flags.
 2. Read stdin → `input::Input` (serde_json, `from_str(..).unwrap_or_default()` — missing/invalid JSON is non-fatal, tokens render empty).
 3. `state::record(&input, now, prune)` persists per-session token + cost state to `$XDG_CACHE_HOME/cc-statusline/sessions.json` (see State below).
-4. Build `tokens::Context` — pre-computes rate-limit parts (`rate::rate_part` for both 5h/300min and 7d/10080min windows), `settings::effort_level` (reads `~/.claude/settings.json`), git branch/diff via `git::branch` / `git::diff_counts` shelling out in `cwd`.
+4. Build `tokens::Context` — pre-computes rate-limit parts (`rate::rate_part` for both 5h/300min and 7d/10080min windows), git branch/diff via `git::branch` / `git::diff_counts` shelling out in `cwd`.
 5. For each format line: `format::parse` → `Vec<Seg>` (Lit / Tok / Group / LineBreak), then `format::render_segs` with closure resolving token names via `context.resolve(name, styles)`.
 6. Print joined output; trailing newline only if non-empty.
 
@@ -65,10 +65,9 @@ Module map:
 - `bar.rs` — bar glyph rendering. 10 cells × 3 sub-levels (`░` → `▒` → `▓` → `█`); used drives the glyph, expected shown as green ghost at matching sub-level, over-curve red.
 - `rate.rs` — rate-limit math: computes used%, bar, Δ% vs linear expected curve, Δt vs expected remaining time, reset countdown. Window length passed in minutes.
 - `peak.rs` — peak-hours logic (5–11 AM US/Pacific, Mon–Fri). DST-aware via `chrono-tz` (`America::Los_Angeles`). The bundled IANA db is filtered to that one zone by `CHRONO_TZ_TIMEZONE_FILTER`, set with `force = true` in `.cargo/config.toml` (keeps the binary ~1.1 MB smaller than the full db; requires chrono-tz's `filter-by-regex` feature). Colors label red in-peak, green off-peak.
-- `context.rs` — context-window bar/percent, including `_usable` variants scaled against the pre-auto-compact budget (0.98 for ≥500k models, 0.80 otherwise).
+- `context.rs` — context-window bar/percent, including `_usable` variants scaled against the pre-auto-compact budget. Claude Code reserves a roughly constant ~20k off the top before auto-compact, so usable = `(size - 20_000) / size` (≈0.98 at 1M, ≈0.90 at 200k) — confirmed against Claude's own "X% context used" footer at both ends.
 - `state.rs` — persistence. Per-session `cost_segments` + token `segments` (each survives Claude resetting the value mid-chat by starting a new segment); per-session `daily_cost` ledger keyed `YYYY-MM-DD` (local tz). `%cd`/`%cm`/`%ca` are computed by aggregating every session's `daily_cost`. Pruning is opt-in (`--prune <dur>` / `CC_STATUSLINE_STATE_TTL_SECONDS`); off by default.
 - `git.rs` — `git rev-parse --abbrev-ref HEAD` + `git diff --numstat HEAD` in the input `cwd`.
-- `settings.rs` — reads `effortLevel` from `~/.claude/settings.json`.
 - `input.rs` — serde structs mirroring Claude Code's statusline JSON schema (model, workspace, cost, rate_limits, context, etc.). All fields `Option`; tolerate shape changes.
 - `mcp.rs` — `cc-statusline mcp` stdio MCP server (read-only `context_usage`, `rate_limits`, `session_summary` tools over the persisted state file).
 - `duration.rs` — ms → `14m12s` style.
