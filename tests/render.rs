@@ -31,6 +31,12 @@ fn model_only() {
 }
 
 #[test]
+fn effort_from_input() {
+    let out = run(&["%e|%effort"], 0, r#"{"effort":{"level":"high"}}"#);
+    assert_eq!(out, "high|high\n");
+}
+
+#[test]
 fn empty_token_collapses_space() {
     let out = run(&["a %vim b"], 0, r#"{}"#);
     assert_eq!(out, "a b\n");

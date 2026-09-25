@@ -13,6 +13,7 @@ pub struct Input {
     pub context_window: Option<ContextWindow>,
     pub exceeds_200k_tokens: Option<bool>,
     pub fast_mode: Option<bool>,
+    pub effort: Option<Effort>,
     pub rate_limits: Option<RateLimits>,
 }
 
@@ -20,6 +21,11 @@ pub struct Input {
 pub struct Model {
     pub id: Option<String>,
     pub display_name: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+pub struct Effort {
+    pub level: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Default)]

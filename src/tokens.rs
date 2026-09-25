@@ -7,7 +7,6 @@ use crate::git;
 use crate::input::Input;
 use crate::peak::peak_part;
 use crate::rate::{rate_part, RateParts};
-use crate::settings;
 use crate::state;
 
 pub struct Context {
@@ -40,7 +39,7 @@ impl Context {
             now,
             10080.0,
         );
-        let effort = settings::effort_level();
+        let effort = input.effort.as_ref().and_then(|e| e.level.clone());
         let cwd = input.cwd.as_deref().map(PathBuf::from);
         let (branch, diff) = match &cwd {
             Some(p) if p.exists() => (git::branch(p), git::diff_counts(p)),

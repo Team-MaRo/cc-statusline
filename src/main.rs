@@ -8,7 +8,6 @@ mod input;
 mod mcp;
 mod peak;
 mod rate;
-mod settings;
 mod state;
 mod tokens;
 
@@ -75,7 +74,7 @@ FLAGS
 TOKENS — MODEL / SESSION
   %m, %model               model display name.  e.g. \"Opus 4.7 (1M context)\"
   %mid, %model_id          model API identifier.  e.g. \"claude-opus-4-7\"
-  %e, %effort              effortLevel from ~/.claude/settings.json.  e.g. \"medium\"
+  %e, %effort              effort.level from Claude Code.  e.g. \"medium\"
   %f, %fast                \"fast\" when fast_mode is true, else empty.
   %v, %version             Claude Code version.  e.g. \"2.1.118\"
   %sid, %session_id        first 8 chars of session_id.  e.g. \"d6486277\"

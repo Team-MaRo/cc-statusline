@@ -144,7 +144,7 @@ Honors `NO_COLOR` env and `--no-color` flag.
 |---|---|---|---|
 | `%m` | `%model` | `model.display_name` | `Opus 4.7 (1M context)` |
 | `%mid` | `%model_id` | `model.id` | `claude-opus-4-7[1m]` |
-| `%e` | `%effort` / `%thinking` | `~/.claude/settings.json` `effortLevel` | `medium` |
+| `%e` | `%effort` / `%thinking` | `effort.level` | `medium` |
 | `%f` | `%fast` | `fast_mode` | `fast` or empty |
 | `%cu` | `%ctx` / `%context` | context vs full window | `[█▒░░░░░░░░] 156k/1M (16%)` |
 | `%cuu` | `%ctx_usable` | context vs usable budget (pre-auto-compact) | `[█▒░░░░░░░░] 156k/980k (16%)` |
@@ -202,7 +202,6 @@ Each cell of the bar fills progressively as `░` → `▒` → `▓` → `█` 
 | `NO_COLOR` | unset | Any value disables all ANSI styling (mirrors `--no-color`). Standard cross-tool convention. |
 | `NOW` | unset | Override "current time" as a unix timestamp. Used for deterministic peak-hour / rate-limit math in tests; mirrors `--now`. |
 | `CC_VIM_MODE` | unset | Value rendered by the `%vim` token (e.g. `NORMAL`, `INSERT`). Typically set by a vim-mode integration. |
-| `CLAUDE_CONFIG_DIR` | `~/.claude` | Where to read `settings.json` from (for `%effort` / `effortLevel`). |
 | `XDG_CACHE_HOME` | `~/.cache` | Base directory for `cc-statusline/sessions.json` (the `%tokens_total` state file). |
 | `CC_STATUSLINE_STATE_TTL_SECONDS` | _unset_ (no pruning) | Opt-in retention: when set (seconds), session entries older than this are pruned on each invocation (current session always kept). Equivalent to the `--prune` flag, which takes precedence. Each session carries its own cost ledger, so pruning a session also drops its contribution to the day/month/all-time totals. |
 
