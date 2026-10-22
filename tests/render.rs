@@ -190,11 +190,11 @@ fn cwd_base_only_basename() {
 
 #[test]
 fn ctx_percent_usable_scales_against_usable_budget() {
-    // 200k reserves ~20k → usable 180k (ratio 0.90). 45% raw → 45/0.90 = 50%.
+    // 200k reserves ~33k → usable 167k (ratio 0.835). 41.75% raw → 41.75/0.835 = 50%.
     let out = run(
         &["%cpu"],
         0,
-        r#"{"context_window":{"context_window_size":200000,"used_percentage":45}}"#,
+        r#"{"context_window":{"context_window_size":200000,"used_percentage":41.75}}"#,
     );
     assert_eq!(out, "50.0%\n");
 }
@@ -652,10 +652,10 @@ fn ctx_user_style_overrides_default() {
 
 #[test]
 fn ctx_pct_usable_green_below_70() {
-    // 45% raw of 200k (usable 180k) → usable = 50% → green
+    // 41.75% raw of 200k (usable 167k) → usable = 50% → green
     let out = run_color(
         &["%cpu"],
-        r#"{"context_window":{"context_window_size":200000,"used_percentage":45}}"#,
+        r#"{"context_window":{"context_window_size":200000,"used_percentage":41.75}}"#,
     );
     assert!(
         out.contains("\x1b[32m") && out.contains("50.0%"),
@@ -666,10 +666,10 @@ fn ctx_pct_usable_green_below_70() {
 
 #[test]
 fn ctx_pct_usable_yellow_at_75() {
-    // 67.5% raw of 200k (usable 180k) → usable = 75% → yellow
+    // 62.625% raw of 200k (usable 167k) → usable = 75% → yellow
     let out = run_color(
         &["%cpu"],
-        r#"{"context_window":{"context_window_size":200000,"used_percentage":67.5}}"#,
+        r#"{"context_window":{"context_window_size":200000,"used_percentage":62.625}}"#,
     );
     assert!(
         out.contains("\x1b[33m") && out.contains("75.0%"),
@@ -680,10 +680,10 @@ fn ctx_pct_usable_yellow_at_75() {
 
 #[test]
 fn ctx_pct_usable_bright_yellow_at_90() {
-    // 81% raw of 200k (usable 180k) → usable = 90% → bright_yellow
+    // 75.15% raw of 200k (usable 167k) → usable = 90% → bright_yellow
     let out = run_color(
         &["%cpu"],
-        r#"{"context_window":{"context_window_size":200000,"used_percentage":81}}"#,
+        r#"{"context_window":{"context_window_size":200000,"used_percentage":75.15}}"#,
     );
     assert!(
         out.contains("\x1b[93m") && out.contains("90.0%"),
@@ -694,10 +694,10 @@ fn ctx_pct_usable_bright_yellow_at_90() {
 
 #[test]
 fn ctx_pct_usable_red_at_100() {
-    // 90% raw of 200k (usable 180k) → usable = 100% → red
+    // 83.5% raw of 200k (usable 167k) → usable = 100% → red
     let out = run_color(
         &["%cpu"],
-        r#"{"context_window":{"context_window_size":200000,"used_percentage":90}}"#,
+        r#"{"context_window":{"context_window_size":200000,"used_percentage":83.5}}"#,
     );
     assert!(
         out.contains("\x1b[31m") && out.contains("100.0%"),
@@ -729,37 +729,37 @@ fn empty_token_between_space_separators_collapses_once() {
 
 #[test]
 fn cuu_composite_renders_bar_tokens_pct_on_1m() {
-    // 1M, 10% used → usable budget = 980k, pct_usable ≈ 10.2%.
+    // 1M, 10% used → usable budget = 967k, pct_usable ≈ 10.3%.
     let out = run(
         &["%cuu"],
         0,
         r#"{"context_window":{"context_window_size":1000000,"used_percentage":10}}"#,
     );
-    assert!(out.contains("100k/980k"), "got: {:?}", out);
+    assert!(out.contains("100k/967k"), "got: {:?}", out);
     assert!(out.contains("(10%)"), "got: {:?}", out);
     assert!(out.starts_with('['), "expected bar prefix, got: {:?}", out);
 }
 
 #[test]
-fn cpu_uses_98pct_ratio_on_1m_context() {
-    // 95% raw of 1M → 95 / 0.98 ≈ 96.9%, no longer capped at 100%.
+fn cpu_uses_967_ratio_on_1m_context() {
+    // 95% raw of 1M → 95 / 0.967 ≈ 98.2%, no longer capped at 100%.
     let out = run(
         &["%cpu"],
         0,
         r#"{"context_window":{"context_window_size":1000000,"used_percentage":95}}"#,
     );
-    assert_eq!(out, "96.9%\n");
+    assert_eq!(out, "98.2%\n");
 }
 
 #[test]
 fn ctx_pct_default_gradient_yellow_at_75pct_usable() {
-    // 200k size (usable 180k), 72% raw → 72/0.90 = 80% usable → yellow.
+    // 200k size (usable 167k), 65% raw → 65/0.835 ≈ 77.8% usable → yellow.
     let out = run_color(
         &["%cup"],
-        r#"{"context_window":{"context_window_size":200000,"used_percentage":72}}"#,
+        r#"{"context_window":{"context_window_size":200000,"used_percentage":65}}"#,
     );
     assert!(
-        out.contains("\x1b[33m") && out.contains("72%"),
+        out.contains("\x1b[33m") && out.contains("65%"),
         "got: {:?}",
         out
     );
@@ -767,7 +767,7 @@ fn ctx_pct_default_gradient_yellow_at_75pct_usable() {
 
 #[test]
 fn ctx_pct_default_gradient_red_near_compact() {
-    // 1M size, 95% raw → 95/0.98 ≈ 96.9% usable → red.
+    // 1M size, 95% raw → 95/0.967 ≈ 98.2% usable → red.
     let out = run_color(
         &["%cup"],
         r#"{"context_window":{"context_window_size":1000000,"used_percentage":95}}"#,
@@ -838,12 +838,12 @@ fn ctx_used_number_green_without_exceeds_flag() {
 }
 
 #[test]
-fn cpu_uses_90pct_ratio_at_200k_size() {
-    // 200k reserves ~20k → usable 180k (ratio 0.90). 45% raw → 45 / 0.90 = 50%.
+fn cpu_uses_835_ratio_at_200k_size() {
+    // 200k reserves ~33k → usable 167k (ratio 0.835). 41.75% raw → 41.75 / 0.835 = 50%.
     let out = run(
         &["%cpu"],
         0,
-        r#"{"context_window":{"context_window_size":200000,"used_percentage":45}}"#,
+        r#"{"context_window":{"context_window_size":200000,"used_percentage":41.75}}"#,
     );
     assert_eq!(out, "50.0%\n");
 }

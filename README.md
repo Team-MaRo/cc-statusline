@@ -72,7 +72,7 @@ Smart defaults (used when no `:style` is given on a token):
 - `%effort` — `low/minimal/none` green, `medium` yellow, `high` red, anything else bright_red.
 - `%ctx_tokens` / `%ctx_tokens_used` / `%ctx_tokens_usable` — "used" portion goes red when `exceeds_200k_tokens` is true, else green. `%ctx_tokens_max` is never auto-colored.
 - `%ctx_bar` / `%ctx_bar_usable` — filled bar cells beyond the 200k mark are red, the rest stays uncolored.
-- `%ctx_pct` (`%cup`) and `%ctx_pct_usable` (`%cpu`) — gradient against the auto-compact threshold (100% usable = compact): green below 70%, yellow 70–85%, bright_yellow 85–95%, red at 95%+. Ignores `exceeds_200k_tokens`. Usable budget = `context_window_size − 20k` (Claude Code reserves a roughly constant ~20k before auto-compact, so ≈98% of a 1M window and ≈90% of a 200k window — matches Claude Code's "X% context used" footer at both ends). The composite `%ctx` / `%cu` displays the raw % but colors it with the same gradient, so the pct portion turns red as auto-compact nears.
+- `%ctx_pct` (`%cup`) and `%ctx_pct_usable` (`%cpu`) — gradient against the auto-compact threshold (100% usable = compact): green below 70%, yellow 70–85%, bright_yellow 85–95%, red at 95%+. Ignores `exceeds_200k_tokens`. Usable budget = `context_window_size − 33k` (Claude Code auto-compacts a constant ~33k below the window — 20k output reserve + 13k buffer — so ≈96.7% of a 1M window (~967k) and ≈83.5% of a 200k window). A smaller window set via `/autocompact` or `CLAUDE_CODE_AUTO_COMPACT_WINDOW` isn't visible to the statusline. The composite `%ctx` / `%cu` displays the raw % but colors it with the same gradient, so the pct portion turns red as auto-compact nears.
 - `%diff` — added count green, removed count red.
 
 Any explicit `:style` on a token overrides these defaults.
@@ -147,13 +147,13 @@ Honors `NO_COLOR` env and `--no-color` flag.
 | `%e` | `%effort` / `%thinking` | `effort.level` | `medium` |
 | `%f` | `%fast` | `fast_mode` | `fast` or empty |
 | `%cu` | `%ctx` / `%context` | context vs full window | `[█▒░░░░░░░░] 156k/1M (16%)` |
-| `%cuu` | `%ctx_usable` | context vs usable budget (pre-auto-compact) | `[█▒░░░░░░░░] 156k/980k (16%)` |
+| `%cuu` | `%ctx_usable` | context vs usable budget (pre-auto-compact) | `[█▒░░░░░░░░] 156k/967k (16%)` |
 | `%cup` | `%ctx_pct` | | `16%` |
 | `%cpu` | `%ctx_pct_usable` | % of usable budget (matches CC "X% context used") | `19.5%` |
 | `%cub` | `%ctx_bar` | | `[█▒░░░░░░░░]` |
 | `%cubu` | `%ctx_bar_usable` | bar vs usable budget | `[█▒░░░░░░░░]` |
 | `%ct` | `%ctx_tokens` | used/full pair | `40k/1M` |
-| `%ctpu` | `%ctx_tokens_usable` | used/usable pair | `40k/980k` |
+| `%ctpu` | `%ctx_tokens_usable` | used/usable pair | `40k/967k` |
 | `%ctu` / `%ctm` | `%ctx_tokens_used` / `%ctx_tokens_max` | used or max alone | `156k` / `1M` |
 | `%tt` | `%tokens_total` | cumulative session tokens — sum of `total_input + total_output` peaks per compaction segment; persisted in `$XDG_CACHE_HOME/cc-statusline/sessions.json`. Retained forever unless `--prune` (or `CC_STATUSLINE_STATE_TTL_SECONDS`) is set. | `4.8M` |
 | `%rl5` | `%rate5h` | 5-hour rate limit | `rl5h:▕bar▏N%(Δ%) 3h27m(Δ±t)` |

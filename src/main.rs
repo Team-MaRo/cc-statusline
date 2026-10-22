@@ -83,15 +83,15 @@ TOKENS — MODEL / SESSION
 
 TOKENS — CONTEXT WINDOW
   %cu, %ctx, %context      composite bar + tokens + percent vs full window.  e.g. \"[█▓░░░░░░░░] 156k/1.0M (16%)\"
-  %cuu, %ctx_usable        composite bar + tokens + percent vs usable budget (pre-auto-compact).  e.g. \"[█▓░░░░░░░░] 156k/980k (16%)\"
+  %cuu, %ctx_usable        composite bar + tokens + percent vs usable budget (pre-auto-compact).  e.g. \"[█▓░░░░░░░░] 156k/967k (16%)\"
   %cub, %ctx_bar           bar only.  e.g. \"[█▓░░░░░░░░]\"
   %cup, %ctx_pct           used % (rounded); colored by the auto-compact gradient (same as %cpu).  e.g. \"16%\"
   %ct, %ctx_tokens         used/max pair.  e.g. \"156k/1.0M\"
   %ctu, %ctx_tokens_used   used tokens only; red when exceeds_200k_tokens, else green.  e.g. \"156k\"
   %ctm, %ctx_tokens_max    max tokens only.  e.g. \"1.0M\"
-  %cpu, %ctx_pct_usable    used % of pre-auto-compact budget (0.98 for ≥500k models, 0.80 otherwise, matches Claude Code's \"X% context used\"); gradients green→yellow→bright_yellow→red at 70/85/95%.  e.g. \"19.5%\"
+  %cpu, %ctx_pct_usable    used % of pre-auto-compact budget (window minus Claude Code's ~33k auto-compact reserve); gradients green→yellow→bright_yellow→red at 70/85/95%.  e.g. \"19.5%\"
   %cubu, %ctx_bar_usable   usable-scaled bar.  e.g. \"[█▓░░░░░░░░]\"
-  %ctpu, %ctx_tokens_usable  used / usable pair.  e.g. \"156k/980k\"
+  %ctpu, %ctx_tokens_usable  used / usable pair.  e.g. \"156k/967k\"
   %tt, %tokens_total       cumulative session tokens (sum of per-compact-segment peaks; persisted in $XDG_CACHE_HOME/cc-statusline/sessions.json; retained forever unless --prune is set).  e.g. \"4.8M\"
   %ts, %total_speed        throughput (tokens per API-second).  e.g. \"62 tok/s\"
 

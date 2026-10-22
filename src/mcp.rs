@@ -272,8 +272,8 @@ mod tests {
         let used_pct = payload["used_percent"].as_f64().unwrap();
         assert!((used_pct - 3.0).abs() < 0.01);
         let usable_pct = payload["usable_percent"].as_f64().unwrap();
-        assert!((usable_pct - 3.061).abs() < 0.01);
-        assert_eq!(payload["remaining_usable_tokens"], 950_000);
+        assert!((usable_pct - 3.102).abs() < 0.01);
+        assert_eq!(payload["remaining_usable_tokens"], 937_000);
     }
 
     #[test]

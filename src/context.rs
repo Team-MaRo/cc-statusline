@@ -103,12 +103,12 @@ pub fn context_bar(context_window: &ContextWindow) -> Option<String> {
     Some(format!("[{}]", plain_bar(percent)))
 }
 
-// Claude Code reserves a roughly constant ~20k off the top of the window before
-// auto-compact, regardless of window size. Confirmed empirically at both ends:
-// 1M Opus compacts ~980k (ratio 0.98), and 200k models read ~180k usable (ratio
-// 0.90) — matching Claude's own "context used" %. So usable = (size - 20k) / size,
-// not a fixed per-tier ratio.
-const USABLE_RESERVE_TOKENS: u64 = 20_000;
+// Claude Code auto-compacts a constant ~33k below the window, regardless of window
+// size: a 20k output reserve plus a 13k auto-compact buffer. Confirmed on 1M
+// sessions, whose context peaks at ~967k before compacting (ratio ≈0.967); a 200k
+// window gets 167k (ratio 0.835). So usable = (size - 33k) / size, not a fixed
+// per-tier ratio.
+const USABLE_RESERVE_TOKENS: u64 = 33_000;
 
 pub fn usable_ratio(size: u64) -> f64 {
     if size <= USABLE_RESERVE_TOKENS {
